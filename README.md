@@ -26,24 +26,25 @@ sudo -u postgres psql
 
 Поключение к БД от имени системного пользователя 
 
-CREATE DATABASE db;
+CREATE DATABASE db;<br>
 CREATE USER ваше_имя WITH PASSWORD 'ваш_пароль';
 
 Создание БД, установка пароля
 
-Установка JDBC-драйвера PostgreSQL в WildFly
-Скачиваем драйвер
-cd /tmp
+Установка JDBC-драйвера PostgreSQL в WildFly<br>
+Скачиваем драйвер<br>
+cd /tmp<br>
 wget https://jdbc.postgresql.org/download/postgresql-42.7.3.jar
 
-Создаем модуль wildfly
-sudo mkdir -p /opt/wildfly/modules/org/postgresql/main
+Создаем модуль wildfly<br>
+sudo mkdir -p /opt/wildfly/modules/org/postgresql/main<br>
 sudo cp postgresql-42.7.3.jar /opt/wildfly/modules/org/postgresql/main/
 
 Создаем module.xml 
 sudo nano /opt/wildfly/modules/org/postgresql/main/module.xml
 
 Содержимое
+```
 <?xml version="1.0" encoding="UTF-8"?>
 <module xmlns="urn:jboss:module:1.3" name="org.postgresql">
     <resources>
@@ -54,13 +55,14 @@ sudo nano /opt/wildfly/modules/org/postgresql/main/module.xml
         <module name="javax.transaction.api"/>
     </dependencies>
 </module>
-
+```
 
 ### 2. WildFly DataSource
 
 Отредактировали файл /opt/wildfly/standalone/configuration/standalone.xml
 
 В секцию <datasources> добавили:
+```
 <datasource jndi-name="java:jboss/datasources/MyAppDB"
             pool-name="MyAppDB"
             enabled="true"
@@ -72,11 +74,13 @@ sudo nano /opt/wildfly/modules/org/postgresql/main/module.xml
         <password>123456789Lw!</password>
     </security>
 </datasource>
-
+```
 В секцию <drivers> добавили:
+```
 <driver name="postgresql" module="org.postgresql">
     <xa-datasource-class>org.postgresql.xa.PGXADataSource</xa-datasource-class>
 </driver>
+```
 
 Этот файл хранится в архиве standalone.zip
 
