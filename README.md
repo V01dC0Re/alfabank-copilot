@@ -140,6 +140,6 @@ sudo nano /opt/wildfly/modules/org/postgresql/main/module.xml
 
 
 Над проектом работали:
-@ Чупров Иван, @V01dC0Re
-@ Гладышев Иван @IvaGroz
-@ Четырина Мария, @Feel69Good
+Чупров Иван, @V01dC0Re<br>
+Гладышев Иван @IvaGroz<br>
+Четырина Мария, @Feel69Good<br>
