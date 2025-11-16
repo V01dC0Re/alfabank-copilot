@@ -61,7 +61,7 @@ sudo nano /opt/wildfly/modules/org/postgresql/main/module.xml
 
 Отредактировали файл /opt/wildfly/standalone/configuration/standalone.xml
 
-В секцию <datasources> добавили:
+В секцию datasources добавили:
 ```
 <datasource jndi-name="java:jboss/datasources/MyAppDB"
             pool-name="MyAppDB"
@@ -75,18 +75,19 @@ sudo nano /opt/wildfly/modules/org/postgresql/main/module.xml
     </security>
 </datasource>
 ```
-В секцию <drivers> добавили:
+В секцию drivers добавили:
 ```
 <driver name="postgresql" module="org.postgresql">
     <xa-datasource-class>org.postgresql.xa.PGXADataSource</xa-datasource-class>
 </driver>
 ```
 
-Этот файл хранится в архиве standalone.zip
+Эти файлы хранятся в архиве standalone.zip
 
 
 ### 3. Hugging Face API Token
 На сайте https://huggingface.co/settings/tokens получаем токен для подключения
+Используем модель Qwen/Qwen2.5-7B-Instruct, так как нет возможности развернуть и обучить свою модель локально/на сервере. В случае дальнейшего развития проекта и имея должные мощности "железа" будет развернута своя модель
 
 ## 📁 Структура
 ```
@@ -134,10 +135,11 @@ sudo nano /opt/wildfly/modules/org/postgresql/main/module.xml
    /opt/wildfly/bin/standalone.sh -b 0.0.0.0 -bmanagement 0.0.0.0
    ```
 
-## Примечания
-- Транзакции управляются вручную через `UserTransaction` — требуется JTA.
-- WildFly должен работать в режиме **Jakarta EE 9+ Profile** (`standalone.xml` или `standalone-ha.xml`).
-- Для production: замените `hibernate.hbm2ddl.auto=update` на `validate`.
+## Примечание
+Файл для деплоя - ROOT.war - также прикреплен. WildFly скачивалось с официального сайта последней версии
 
 
-© Иван, студент ИТМО (Программная инженерия)
+Над проектом работали:
+@ Чупров Иван, @V01dC0Re
+@ Гладышев Иван @IvaGroz
+@ Четырина Мария, @Feel69Good
