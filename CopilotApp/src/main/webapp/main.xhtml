@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+
+<h:head>
+    <title>Главная — CopilotApp</title>
+    <link rel="stylesheet" type="text/css" href="#{request.contextPath}/css/main-style.css" />
+    <style>
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255,255,255,0.7);
+            z-index: 9999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            display: none;
+        }
+        .spinner {
+            border: 4px solid rgba(0,0,0,0.1);
+            border-radius: 50%;
+            border-top: 4px solid #3498db;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</h:head>
+
+<h:body>
+    <h:outputScript library="primefaces" name="jquery/jquery.js" />
+    
+    <div class="loading-overlay" id="globalLoading">
+        <div class="spinner"></div>
+    </div>
+
+    <h:form id="mainForm">
+        <p:messages id="globalMessages" autoUpdate="true" closable="true" severity="error,warn"/>
+
+        <div class="main-container">
+            <div class="header">
+                <h1>Добро пожаловать, <span class="username">#{loginBean.currentUser.username}</span>!</h1>
+
+                <div class="header-actions">
+                    <p:commandButton icon="pi pi-sun"
+                                     onclick="toggleTheme(); return false;"
+                                     title="Переключить тему" />
+
+                    <h:commandButton value="Выйти"
+                                     action="#{loginBean.logout}"
+                                     styleClass="logout-btn" />
+                </div>
+            </div>
+
+            <div class="app-layout">
+                <!-- Левая панель: список чатов -->
+                <div class="sidebar">
+                    <div class="sidebar-header">
+                        <h2>Чаты</h2>
+                        <p:commandButton value="Новый чат"
+                                         onclick="PF('newChatDialog').show()"
+                                         styleClass="new-chat-btn"
+                                         update="chatList"
+                                         disabled="#{chatBean.loading}" />
+                    </div>
+                    
+                    <h:panelGroup id="chatList">
+                        <div class="chat-list">
+                            <ui:repeat value="#{chatBean.userChats}" var="chat">
+                                <p:commandLink value="#{chat.title}"
+                                               action="#{chatBean.switchToChat(chat)}"
+                                               update=":mainForm:messagesContainer :mainForm:chatHeaderPanel"
+                                               styleClass="chat-item #{chatBean.currentChat != null and chat.id eq chatBean.currentChat.id ? 'active' : ''}"
+                                               ajax="true"
+                                               disabled="#{chatBean.loading}">
+                                    <p:ajax onstart="$('#globalLoading').show();" 
+                                            oncomplete="$('#globalLoading').hide();" />
+                                </p:commandLink>
+                            </ui:repeat>
+                        </div>
+                    </h:panelGroup>
+                </div>
+
+                <div class="chat-area">
+                    <h:panelGroup id="chatHeaderPanel" layout="block" styleClass="chat-header">
+                        <h:outputText value="#{chatBean.currentChat != null ? chatBean.currentChat.title : 'Новый чат'}"/>
+                    </h:panelGroup>
+
+                    <div class="messages-container">
+                        <h:panelGroup id="messagesContainer">
+                            <ui:repeat value="#{chatBean.messages}" var="msg">
+                                <div class="message #{msg.role eq 'user' ? 'user-message' : 'bot-message'}">
+                                    <h:outputText value="#{msg.content}" escape="false"/>
+                                </div>
+                            </ui:repeat>
+                            
+                        </h:panelGroup>
+                    </div>
+
+                    <div class="input-form">
+                        <p:inputTextarea value="#{chatBean.userInput}"
+                                         rows="3"
+                                         styleClass="message-input"
+                                         placeholder="Введите сообщение..."
+                                         id="messageInput"
+                                         disabled="#{chatBean.loading}" />
+                                         
+<p:commandButton value="Отправить" 
+action="#{chatBean.sendMessage}" 
+update=":mainForm:messagesContainer :mainForm:chatList :mainForm:globalMessages :mainForm:messageInput"
+styleClass="send-btn"
+ajax="true"
+disabled="#{chatBean.loading}"
+icon="#{chatBean.loading ? 'pi pi-spin pi-spinner' : ''}">
+<p:ajax onstart="$('#globalLoading').show();" 
+oncomplete="$('#globalLoading').hide();" />
+</p:commandButton>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <p:dialog header="Новый чат"
+                  widgetVar="newChatDialog"
+                  modal="true"
+                  resizable="false"
+                  width="300"
+                  draggable="false">
+
+            <h:panelGrid columns="1" cellpadding="5">
+                <p:inputText value="#{chatBean.newChatTitle}"
+                             placeholder="Введите название чата"
+                             maxlength="30"
+                             disabled="#{chatBean.loading}" />
+
+                <div style="text-align: right; margin-top: 12px;">
+                    <p:commandButton value="Отмена"
+                                     onclick="PF('newChatDialog').hide()"
+                                     styleClass="cancel-btn"
+                                     ajax="false"
+                                     disabled="#{chatBean.loading}" />
+                    <p:commandButton value="Создать"
+                                     action="#{chatBean.createNewChat}"
+                                     update=":mainForm:chatList :mainForm:chatHeaderPanel :mainForm:messagesContainer"
+                                     oncomplete="PF('newChatDialog').hide();"
+                                     styleClass="create-btn"
+                                     disabled="#{chatBean.loading}" />
+                </div>
+            </h:panelGrid>
+        </p:dialog>
+    </h:form>
+    
+    <script type="text/javascript">
+    /* <![CDATA[ */
+        $(document).ajaxStart(function() {
+            setTimeout(function() {
+                if (!$('#globalLoading').is(':visible')) {
+                    $('#globalLoading').show();
+                }
+            }, 500);
+        });
+        
+        $(document).ajaxComplete(function() {
+            $('#globalLoading').hide();
+        });
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            var input = document.getElementById('mainForm:messageInput');
+            if (input) {
+                input.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter' &amp;&amp; !e.shiftKey) {
+                        e.preventDefault();
+                        document.querySelector('.send-btn').click();
+                    }
+                });
+            }
+        });
+    /* ]]> */
+    </script>
+</h:body>
+</html>

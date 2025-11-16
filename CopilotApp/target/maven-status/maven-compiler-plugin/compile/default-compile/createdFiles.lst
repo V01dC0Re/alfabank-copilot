@@ -1,0 +1,6 @@
+beans/LoginBean.class
+entities/Chat.class
+entities/User.class
+beans/ChatBean.class
+services/HuggingFaceService.class
+entities/Message.class
